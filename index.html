@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build Your AffixGuard</title>
+<meta name="description" content="Design your own AffixGuard: pick your guard, your color and snap in your Affix Charms. Pre-orders open, ships after December 2026.">
+<link rel="icon" href="img/logo.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Build Your AffixGuard">
+<meta property="og:description" content="Pick your guard, your color and snap in your charms. Pre-orders open, ships after December 2026.">
+<meta property="og:image" content="https://ramos29tommy-sketch.github.io/affixguard/img/hero-leg-guard.jpg">
+<meta property="og:url" content="https://ramos29tommy-sketch.github.io/affixguard/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --panel: #151517;
+    --panel-2: #1d1d20;
+    --line: #2a2a2e;
+    --text: #f2f2f2;
+    --muted: #a3a3a8;
+    --lime: #8be03a;
+    --lime-dark: #5fa61c;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; }
+  body { min-height: 100vh; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  a { color: var(--lime); }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 20px; border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; background: rgba(10,10,11,.92); backdrop-filter: blur(8px); z-index: 10;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+  .brand img { width: 40px; height: 40px; border-radius: 50%; background: #fff; object-fit: contain; }
+  .brand span { font-family: Oswald, sans-serif; font-size: 22px; letter-spacing: .5px; }
+  .badge { font-size: 12px; font-weight: 700; color: #0a0a0b; background: var(--lime); padding: 5px 10px; border-radius: 999px; white-space: nowrap; }
+
+  .hero { text-align: center; padding: 28px 16px 8px; }
+  .hero h1 { font-family: Oswald, sans-serif; font-size: clamp(30px, 6vw, 52px); margin: 0; letter-spacing: 1px; text-transform: uppercase; }
+  .hero h1 em { color: var(--lime); font-style: normal; }
+  .hero p { color: var(--muted); margin: 8px auto 0; max-width: 560px; }
+
+  main {
+    display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px;
+    max-width: 1180px; margin: 0 auto; padding: 20px 16px 120px;
+  }
+  @media (max-width: 860px) { main { grid-template-columns: minmax(0, 1fr); } }
+  .stage, .steps, .step { min-width: 0; }
+  .stage { overflow: hidden; }
+  .guard-wrap { min-width: 0; }
+  .guard-wrap svg { max-width: 100%; }
+
+  /* stage */
+  .stage {
+    position: sticky; top: 84px; align-self: start;
+    background: radial-gradient(circle at 50% 42%, #2a2a2e 0%, #121214 55%, #0a0a0b 100%);
+    border: 1px solid var(--line); border-radius: var(--radius);
+    min-height: 520px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px;
+  }
+  @media (max-width: 860px) {
+    .stage { position: relative; top: 0; min-height: 0; padding: 14px 10px; }
+    .stage .guard-wrap svg { width: auto; height: 300px; }
+    .stage .guard-wrap.single svg { width: auto; height: 340px; }
+    .stage-hint { margin-top: 6px; font-size: 12px; }
+    .guard-label { font-size: 11px; }
+  }
+  @media (max-width: 520px) {
+    header { padding: 10px 14px; }
+    .brand span { font-size: 18px; white-space: nowrap; }
+    .brand img { width: 34px; height: 34px; }
+    .badge { white-space: normal; text-align: center; font-size: 10px; max-width: 150px; line-height: 1.25; }
+    .hero { padding-top: 18px; }
+    .hero p { font-size: 14px; }
+    .bar { padding: 10px 14px; }
+    .bar .total { font-size: 22px; }
+    .bar .lines { max-width: 46vw; }
+    .cta { padding: 12px 16px; font-size: 14px; }
+    .cta .long { display: none; }
+    .bar > div { min-width: 0; }
+  }
+  .guards { display: flex; gap: 18px; align-items: flex-end; justify-content: center; width: 100%; }
+  .guard-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; transition: opacity .25s, transform .25s; }
+  .guard-wrap.hidden { display: none; }
+  .guard-wrap.inactive { opacity: .55; transform: scale(.94); }
+  .guard-wrap svg { width: min(230px, 40vw); height: auto; animation: float 4s ease-in-out infinite; filter: drop-shadow(0 18px 24px rgba(0,0,0,.6)); cursor: pointer; }
+  .guard-wrap.single svg { width: min(270px, 62vw); }
+  .guard-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+  .guard-wrap.active .guard-label { color: var(--lime); font-weight: 700; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .charm-img { cursor: pointer; transform-box: fill-box; transform-origin: center; animation: pop .35s cubic-bezier(.2,1.6,.4,1); }
+  .charm-img:hover { filter: brightness(1.15); }
+  @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+  .hole-target { cursor: pointer; }
+  .stage-hint { color: var(--muted); font-size: 13px; margin-top: 14px; text-align: center; }
+
+  /* steps */
+  .steps { display: flex; flex-direction: column; gap: 18px; }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .step h2 { font-family: Oswald, sans-serif; font-size: 20px; margin: 0 0 12px; letter-spacing: .5px; display: flex; align-items: center; gap: 10px; }
+  .num { width: 28px; height: 28px; border-radius: 50%; background: var(--lime); color: #0a0a0b; display: inline-grid; place-items: center; font-size: 15px; }
+
+  .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 480px) {
+    .options { gap: 8px; }
+    .option { padding: 10px 8px; text-align: center; }
+    .option b { font-size: 14px; }
+    .option small { font-size: 11px; }
+    .save { font-size: 10px; }
+  }
+  .option {
+    background: var(--panel-2); border: 2px solid var(--line); border-radius: 12px; padding: 12px 10px; text-align: left;
+    transition: border-color .15s, transform .15s;
+  }
+  .option:hover { transform: translateY(-2px); }
+  .option.selected { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(139,224,58,.15); }
+  .option b { display: block; font-size: 15px; }
+  .option .price { color: var(--lime); font-weight: 700; margin-top: 4px; display: block; }
+  .option small { color: var(--muted); display: block; margin-top: 4px; font-size: 12px; }
+  .save { display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 700; color: #0a0a0b; background: var(--lime); border-radius: 6px; padding: 2px 6px; }
+
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+  .swatch {
+    width: 42px; height: 42px; border-radius: 50%; border: 3px solid var(--panel); outline: 2px solid var(--line);
+    transition: transform .15s, outline-color .15s;
+  }
+  .swatch:hover { transform: scale(1.1); }
+  .swatch.selected { outline: 3px solid var(--lime); }
+  .color-name { margin-top: 10px; color: var(--muted); font-size: 14px; }
+  .color-name b { color: var(--text); }
+  .custom-color { margin-top: 10px; display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; }
+  .custom-color input[type=text] { flex: 1; min-width: 0; background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 8px 10px; font: inherit; }
+
+  .charms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (min-width: 520px) { .charms { grid-template-columns: repeat(6, 1fr); } }
+  .charm-btn {
+    background: var(--panel-2); border: 2px solid var(--line); border-radius: 12px; padding: 8px 4px 6px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; transition: transform .15s, border-color .15s;
+  }
+  .charm-btn:hover { transform: translateY(-2px); border-color: var(--lime-dark); }
+  .charm-btn img { width: 52px; height: 52px; object-fit: contain; }
+  .charm-btn span { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.2; }
+  .charm-btn .count { position: absolute; top: -8px; right: -8px; background: var(--lime); color: #0a0a0b; font-weight: 700; font-size: 12px; border-radius: 999px; min-width: 22px; height: 22px; display: none; place-items: center; padding: 0 6px; }
+  .charm-btn .count.show { display: grid; }
+  .mini { display: none; }
+  @media (max-width: 860px) {
+    .charm-area { display: flex; gap: 10px; align-items: stretch; }
+    .mini {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 42%;
+      background: radial-gradient(circle at 50% 40%, #2a2a2e 0%, #121214 70%); border: 1px solid var(--line); border-radius: 12px; padding: 8px 4px;
+    }
+    .mini-guards { display: flex; gap: 4px; align-items: flex-end; justify-content: center; width: 100%; }
+    .mini-wrap { flex: 1; min-width: 0; display: flex; justify-content: center; transition: opacity .2s, transform .2s; cursor: pointer; }
+    .mini-wrap.hidden { display: none; }
+    .mini-wrap.inactive { display: none; }
+    .mini-wrap svg { width: 100%; max-height: 250px; height: auto; filter: drop-shadow(0 8px 12px rgba(0,0,0,.6)); }
+    .mini-hint { font-size: 10px; color: var(--lime); text-align: center; margin-top: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    .charm-area .charms { flex: 1; grid-template-columns: repeat(2, 1fr); align-content: start; }
+  }
+  .charm-tools { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .ghost { background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; font-size: 13px; color: var(--muted); }
+  .ghost:hover { color: var(--text); border-color: var(--muted); }
+  .note { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+
+  select { width: 100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 10px; font: inherit; }
+
+  /* summary bar */
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    background: rgba(18,18,20,.97); border-top: 1px solid var(--line); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px;
+  }
+  .bar > div { min-width: 0; flex: 1; }
+  .bar .lines { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar .total { font-family: Oswald, sans-serif; font-size: 26px; }
+  .cta {
+    background: var(--lime); color: #0a0a0b; border: 0; border-radius: 999px; padding: 14px 22px; font-weight: 700; font-size: 16px; white-space: nowrap;
+    box-shadow: 0 6px 20px rgba(139,224,58,.25); transition: transform .15s;
+  }
+  .cta:hover { transform: translateY(-2px); }
+  .cta:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+  /* checklist modal */
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+  .modal.open { display: flex; }
+  .sheet { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); max-width: 460px; width: 100%; padding: 22px; max-height: 90vh; overflow: auto; }
+  .sheet h3 { font-family: Oswald, sans-serif; margin: 0 0 6px; font-size: 24px; }
+  .sheet p { color: var(--muted); margin: 0 0 12px; font-size: 14px; }
+  .checklist { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-direction: column; gap: 8px; }
+  .checklist li { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+  .checklist li b { color: var(--lime); }
+  .design-box { background: var(--panel-2); border: 1px dashed var(--lime-dark); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--text); margin-bottom: 10px; word-break: break-word; }
+  .sheet .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .sheet .row > * { flex: 1; }
+  .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--lime); color: #0a0a0b; font-weight: 700; padding: 10px 16px; border-radius: 999px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 60; }
+  .toast.show { opacity: 1; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 0 16px 110px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="brand" href="#">
+    <img src="img/logo.png" alt="AffixGuard knight logo">
+    <span>AFFIX GUARD</span>
+  </a>
+  <span class="badge">PRE-ORDERS OPEN · SHIPS AFTER DEC 2026</span>
+</header>
+
+<section class="hero">
+  <h1>Build your <em>AffixGuard</em></h1>
+  <p>Pick your guard, pick your color, snap in your charms. Tap a charm to add it, tap it on the guard to take it off.</p>
+</section>
+
+<main>
+  <!-- live preview -->
+  <section class="stage" aria-label="Your guard preview">
+    <div class="guards">
+      <div class="guard-wrap" id="wrap-elbow" data-guard="elbow">
+        <svg id="svg-elbow" viewBox="0 0 220 350" role="img" aria-label="Elbow guard preview"></svg>
+        <div class="guard-label">Elbow guard</div>
+      </div>
+      <div class="guard-wrap" id="wrap-leg" data-guard="leg">
+        <svg id="svg-leg" viewBox="0 0 220 440" role="img" aria-label="Leg guard preview"></svg>
+        <div class="guard-label">Leg guard</div>
+      </div>
+    </div>
+    <div class="stage-hint" id="stage-hint">Tap a guard to choose which one gets your charms.</div>
+  </section>
+
+  <!-- steps -->
+  <section class="steps">
+    <div class="step">
+      <h2><span class="num">1</span> Choose your guard</h2>
+      <div class="options" id="products"></div>
+    </div>
+
+    <div class="step">
+      <h2><span class="num">2</span> Pick your color</h2>
+      <div class="swatches" id="swatches"></div>
+      <div class="color-name">Color: <b id="color-name">Black</b></div>
+      <label class="custom-color">Want a different color?
+        <input type="text" id="custom-color" maxlength="40" placeholder="Type any color, e.g. teal">
+      </label>
+    </div>
+
+    <div class="step">
+      <h2><span class="num">3</span> Snap in your charms <small style="color:var(--muted);font-family:Inter;font-size:13px;font-weight:400">$10.99 each</small></h2>
+      <div class="charm-area">
+        <div class="mini" aria-label="Live preview of your guard">
+          <div class="mini-guards">
+            <div class="mini-wrap" id="mini-wrap-elbow"><svg id="svg-mini-elbow" viewBox="0 0 220 350"></svg></div>
+            <div class="mini-wrap" id="mini-wrap-leg"><svg id="svg-mini-leg" viewBox="0 0 220 440"></svg></div>
+          </div>
+          <div class="mini-hint" id="mini-hint">Live preview</div>
+        </div>
+        <div class="charms" id="charms"></div>
+      </div>
+      <div class="charm-tools">
+        <button class="ghost" id="shuffle" type="button">🎲 Surprise me</button>
+        <button class="ghost" id="clear" type="button">Clear charms</button>
+      </div>
+      <p class="note" id="charm-note"></p>
+    </div>
+
+    <div class="step">
+      <h2><span class="num">4</span> Your size</h2>
+      <select id="size" aria-label="Size">
+        <option value="">Choose a size…</option>
+        <option>Youth Small</option><option>Youth Medium</option><option>Youth Large</option>
+        <option>Adult Small</option><option>Adult Medium</option><option>Adult Large</option>
+      </select>
+      <p class="note">Flat $10.99 shipping on every order. Pre-order now, ships after December 2026.</p>
+    </div>
+  </section>
+</main>
+
+<footer>© AffixGuard · Follow <a href="https://www.instagram.com/affixguards/" target="_blank" rel="noopener">@affixguards</a> for drops and new charms</footer>
+
+<div class="bar">
+  <div>
+    <div class="total" id="total">$0.00</div>
+    <div class="lines" id="lines">Choose a guard to start</div>
+  </div>
+  <button class="cta" id="preorder" type="button" disabled>Pre-order<span class="long"> my AffixGuard</span> →</button>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="sheet">
+    <h3 id="modal-title">Almost done! 🛡️</h3>
+    <p>On the secure Stripe checkout, tap <b>+ Add</b> on each item below, then enter your size and color.</p>
+    <ul class="checklist" id="checklist"></ul>
+    <p style="margin-bottom:6px">Your design (paste it in the <b>Notes</b> box at checkout):</p>
+    <div class="design-box" id="design-text"></div>
+    <div class="row">
+      <button class="ghost" id="copy" type="button">📋 Copy my design</button>
+      <button class="cta" id="go" type="button">Go to checkout →</button>
+    </div>
+    <p class="note" style="margin-top:12px"><a href="#" id="close">← Keep designing</a></p>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const STRIPE_LINK = "https://buy.stripe.com/dRm14ndoTfIWaY0bzefYY01";
+  const SHIPPING = 10.99, CHARM_PRICE = 10.99;
+
+  const PRODUCTS = [
+    { id: "elbow", name: "Elbow Guard",  desc: "Single guard",      price: 44.99, guards: ["elbow"], stripe: "AffixGuard Elbow Guard" },
+    { id: "pair",  name: "Both (Pair)",  desc: "Elbow + Leg guard", price: 80.00, guards: ["elbow", "leg"], save: "Save $9.98", stripe: "AffixGuard Pair (Elbow + Leg Guard)" },
+    { id: "leg",   name: "Leg Guard",    desc: "Single guard",      price: 44.99, guards: ["leg"],   stripe: "AffixGuard Leg Guard" },
+  ];
+  const COLORS = [
+    { id: "black",  name: "Black",       fill: "#1b1b1e" },
+    { id: "white",  name: "White",       fill: "#ececec" },
+    { id: "red",    name: "Red",         fill: "#c8202f" },
+    { id: "royal",  name: "Royal Blue",  fill: "#1f4fd1" },
+    { id: "navy",   name: "Navy",        fill: "#14224a" },
+    { id: "green",  name: "Kelly Green", fill: "#178a3c" },
+    { id: "orange", name: "Orange",      fill: "#ef6c12" },
+    { id: "gold",   name: "Gold",        fill: "#d9a520" },
+    { id: "purple", name: "Purple",      fill: "#5b2a9e" },
+    { id: "pink",   name: "Pink",        fill: "#f06aa8" },
+    { id: "pinkcamo", name: "Pink Camo", fill: "pattern:camo-pink", swatch: "repeating-linear-gradient(45deg,#f06aa8 0 8px,#b83c7a 8px 14px,#f9b3d3 14px 20px)" },
+    { id: "camo",   name: "Camo",        fill: "pattern:camo-green", swatch: "repeating-linear-gradient(45deg,#4b5a2a 0 8px,#2e361a 8px 14px,#7d7a4a 14px 20px)" },
+  ];
+  const CHARMS = [
+    { id: "baseball",       name: "Baseball",       stripe: "Affix Charm - Baseball" },
+    { id: "lightning-bolt", name: "Lightning Bolt", stripe: "Affix Charm - Lightning Bolt" },
+    { id: "crown",          name: "Crown",          stripe: "Affix Charm - Crown" },
+    { id: "number-7",       name: "Lucky 7",        stripe: "Affix Charm - Lucky 7" },
+    { id: "flame",          name: "Flame",          stripe: "Affix Charm - Flame" },
+    { id: "gold-star",      name: "Gold Star",      stripe: "Affix Charm - Gold Star" },
+  ];
+  // charm holes (center points) for each guard, in SVG units
+  const HOLES = {
+    leg:   [[72,178],[148,178],[110,222],[72,266],[148,266],[110,306]],
+    elbow: [[70,148],[150,148],[110,186],[70,224],[150,224]],
+  };
+  const CHARM_SIZE = 50;
+
+  const state = { product: null, color: "black", active: "leg", charms: { leg: Array(6).fill(null), elbow: Array(5).fill(null) } };
+  const $ = (s) => document.querySelector(s);
+  const money = (n) => "$" + n.toFixed(2);
+
+  // ---------- drawing ----------
+  const NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function defs(svg, key) {
+    const d = el("defs", {}, svg);
+    // shine across the shell
+    const g = el("linearGradient", { id: "shine-" + key, x1: "0", y1: "0", x2: "1", y2: "0" }, d);
+    el("stop", { offset: "0", "stop-color": "#fff", "stop-opacity": ".22" }, g);
+    el("stop", { offset: ".35", "stop-color": "#fff", "stop-opacity": ".04" }, g);
+    el("stop", { offset: ".7", "stop-color": "#000", "stop-opacity": ".05" }, g);
+    el("stop", { offset: "1", "stop-color": "#000", "stop-opacity": ".35" }, g);
+    // camo patterns
+    [["camo-pink", ["#f06aa8", "#b83c7a", "#f9b3d3", "#d94f90"]], ["camo-green", ["#4b5a2a", "#2e361a", "#7d7a4a", "#5f6b35"]]].forEach(([pid, c]) => {
+      const p = el("pattern", { id: pid + "-" + key, width: "60", height: "60", patternUnits: "userSpaceOnUse" }, d);
+      el("rect", { width: "60", height: "60", fill: c[0] }, p);
+      el("path", { d: "M5 10 q15 -12 25 2 t20 8 q-5 14 -22 10 t-23 -20z", fill: c[1] }, p);
+      el("path", { d: "M32 34 q12 -8 22 4 q-4 16 -18 12 t-4 -16z", fill: c[2] }, p);
+      el("path", { d: "M0 44 q10 -6 16 4 q-2 10 -16 8z", fill: c[3] }, p);
+    });
+  }
+  function drawGuard(id) {
+    drawGuardInto(id, document.getElementById("svg-" + id), id);
+    drawGuardInto(id, document.getElementById("svg-mini-" + id), "mini-" + id);
+  }
+  function drawGuardInto(id, svg, key) {
+    svg.innerHTML = "";
+    defs(svg, key);
+    const isLeg = id === "leg";
+    const shell = isLeg
+      ? "M34 44 Q36 10 74 8 L146 8 Q184 10 186 44 L190 382 Q158 420 110 398 Q62 420 30 382 Z"
+      : "M36 52 Q40 22 70 14 L150 30 Q180 40 184 70 L188 302 Q158 338 110 320 Q62 338 32 302 Z";
+    const color = COLORS.find(c => c.id === state.color);
+    const fill = color.fill.startsWith("pattern:") ? `url(#${color.fill.slice(8)}-${key})` : color.fill;
+    el("path", { d: shell, fill: fill, stroke: "#000", "stroke-opacity": ".55", "stroke-width": "2" }, svg);
+    el("path", { d: shell, fill: "url(#shine-" + key + ")" }, svg);
+    // rim
+    el("path", { d: shell, fill: "none", stroke: "#fff", "stroke-opacity": ".10", "stroke-width": "5", transform: "translate(0,2)" }, svg);
+    // decorative top/bottom vent holes
+    const vents = isLeg ? [[70,40],[150,40],[72,392],[148,392]] : [[72,48],[148,60],[74,314],[146,314]];
+    vents.forEach(([x, y]) => el("circle", { cx: x, cy: y, r: 7, fill: "#050505", "fill-opacity": ".9" }, svg));
+    // straps
+    const straps = isLeg ? [[70, 70], [330, 64]] : [[66, 50], [252, 48]];
+    straps.forEach(([y, h]) => {
+      el("rect", { x: 14, y: y, width: 192, height: h, rx: 8, fill: "#8be03a" }, svg);
+      el("rect", { x: 14, y: y, width: 192, height: h, rx: 8, fill: "url(#shine-" + key + ")", opacity: ".6" }, svg);
+      el("rect", { x: 20, y: y + 5, width: 180, height: h - 10, rx: 5, fill: "none", stroke: "#4f8a1a", "stroke-width": "1.5", "stroke-dasharray": "4 3" }, svg);
+      el("rect", { x: 14, y: y, width: 28, height: h, rx: 6, fill: "#79c92f" }, svg);
+      const s = h - 10;
+      el("image", { href: "img/logo.png", x: 110 - s * 0.42, y: y + 5, width: s * 0.84, height: s, preserveAspectRatio: "xMidYMid meet", style: "mix-blend-mode:multiply" }, svg);
+    });
+    // charm holes + charms
+    HOLES[id].forEach(([x, y], i) => {
+      const charm = state.charms[id][i];
+      if (charm) {
+        const img = el("image", {
+          href: "img/charm-" + charm + ".png", x: x - CHARM_SIZE / 2, y: y - CHARM_SIZE / 2,
+          width: CHARM_SIZE, height: CHARM_SIZE, class: "charm-img"
+        }, svg);
+        const t = el("title", {}, img); t.textContent = "Tap to remove";
+        img.addEventListener("click", (e) => { e.stopPropagation(); removeCharm(id, i); });
+      } else {
+        el("circle", { cx: x, cy: y, r: 9, fill: "#050505", "fill-opacity": ".92" }, svg);
+        el("circle", { cx: x, cy: y + 1.5, r: 9, fill: "none", stroke: "#fff", "stroke-opacity": ".12" }, svg);
+      }
+    });
+  }
+  function drawAll() { drawGuard("leg"); drawGuard("elbow"); }
+
+  // ---------- ui ----------
+  function renderProducts() {
+    const box = $("#products"); box.innerHTML = "";
+    PRODUCTS.forEach(p => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "option" + (state.product === p.id ? " selected" : "");
+      b.innerHTML = `<b>${p.name}</b><small>${p.desc}</small><span class="price">${money(p.price)}</span>` + (p.save ? `<span class="save">${p.save}</span>` : "");
+      b.addEventListener("click", () => selectProduct(p.id));
+      box.appendChild(b);
+    });
+  }
+  function renderSwatches() {
+    const box = $("#swatches"); box.innerHTML = "";
+    COLORS.forEach(c => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "swatch" + (state.color === c.id ? " selected" : "");
+      b.style.background = c.swatch || c.fill; b.title = c.name; b.setAttribute("aria-label", c.name);
+      b.addEventListener("click", () => { state.color = c.id; $("#custom-color").value = ""; update(); });
+      box.appendChild(b);
+    });
+  }
+  function renderCharms() {
+    const box = $("#charms"); box.innerHTML = "";
+    CHARMS.forEach(c => {
+      const n = countCharm(c.id);
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "charm-btn"; b.title = "Add " + c.name;
+      b.innerHTML = `<img src="img/charm-${c.id}.png" alt=""><span>${c.name}</span><span class="count ${n ? "show" : ""}">${n}</span>`;
+      b.addEventListener("click", () => addCharm(c.id));
+      box.appendChild(b);
+    });
+  }
+  function guardsInUse() {
+    const p = PRODUCTS.find(p => p.id === state.product);
+    return p ? p.guards : ["elbow", "leg"];
+  }
+  function layoutStage() {
+    const use = guardsInUse();
+    ["elbow", "leg"].forEach(g => {
+      const w = document.getElementById("wrap-" + g);
+      w.classList.toggle("hidden", !use.includes(g));
+      w.classList.toggle("single", use.length === 1);
+      w.classList.toggle("active", state.active === g && use.length > 1);
+      w.classList.toggle("inactive", state.active !== g && use.length > 1);
+      const m = document.getElementById("mini-wrap-" + g);
+      m.classList.toggle("hidden", !use.includes(g));
+      m.classList.toggle("active", state.active === g && use.length > 1);
+      m.classList.toggle("inactive", state.active !== g && use.length > 1);
+    });
+    const other = state.active === "leg" ? "elbow" : "leg";
+    $("#mini-hint").innerHTML = use.length > 1
+      ? `${state.active} guard<br><span style="color:var(--muted)">tap guard for ${other} ↻</span>`
+      : "Live preview";
+    $("#stage-hint").textContent = use.length > 1
+      ? `Charms go on the ${state.active} guard. Tap the other guard to switch.`
+      : (state.product ? "Tap a charm below to snap it in. Tap it on the guard to remove it." : "Choose a guard to start.");
+  }
+  function selectProduct(id) {
+    state.product = id;
+    const use = guardsInUse();
+    if (!use.includes(state.active)) state.active = use[0];
+    // drop charms on guards no longer in the order
+    ["elbow", "leg"].forEach(g => { if (!use.includes(g)) state.charms[g] = state.charms[g].map(() => null); });
+    update();
+  }
+  function countCharm(cid) {
+    return guardsInUse().reduce((n, g) => n + state.charms[g].filter(x => x === cid).length, 0);
+  }
+  function addCharm(cid) {
+    if (!state.product) { toast("Choose your guard first ☝️"); return; }
+    const slots = state.charms[state.active];
+    const i = slots.indexOf(null);
+    if (i === -1) {
+      const other = guardsInUse().find(g => g !== state.active && state.charms[g].includes(null));
+      if (other) { state.active = other; return addCharm(cid); }
+      toast("All holes are full! Tap a charm on the guard to swap it."); return;
+    }
+    slots[i] = cid; update();
+  }
+  function removeCharm(g, i) { state.charms[g][i] = null; update(); }
+  function totalCharms() { return guardsInUse().reduce((n, g) => n + state.charms[g].filter(Boolean).length, 0); }
+
+  function colorName() {
+    const custom = $("#custom-color").value.trim();
+    return custom || COLORS.find(c => c.id === state.color).name;
+  }
+  function update() {
+    drawAll(); renderProducts(); renderSwatches(); renderCharms(); layoutStage();
+    $("#color-name").textContent = colorName();
+    const p = PRODUCTS.find(p => p.id === state.product);
+    const n = totalCharms();
+    const total = p ? p.price + n * CHARM_PRICE + SHIPPING : 0;
+    $("#total").textContent = money(total);
+    $("#lines").textContent = p
+      ? `${p.name} ${money(p.price)}` + (n ? ` · ${n} charm${n > 1 ? "s" : ""} ${money(n * CHARM_PRICE)}` : "") + ` · shipping ${money(SHIPPING)}`
+      : "Choose a guard to start";
+    $("#preorder").disabled = !p;
+    const cap = guardsInUse().reduce((s, g) => s + HOLES[g].length, 0);
+    $("#charm-note").textContent = p ? `${n} of ${cap} holes filled.` : "";
+  }
+
+  // ---------- checkout ----------
+  function designText() {
+    const p = PRODUCTS.find(p => p.id === state.product);
+    const parts = [`${p.name}`, `Color: ${colorName()}`];
+    const size = $("#size").value; if (size) parts.push(`Size: ${size}`);
+    p.guards.forEach(g => {
+      const list = state.charms[g].filter(Boolean).map(id => CHARMS.find(c => c.id === id).name);
+      if (list.length) parts.push(`${g === "leg" ? "Leg" : "Elbow"} charms: ${list.join(", ")}`);
+    });
+    return parts.join(" | ");
+  }
+  function designCode() {
+    // short code stored on the Stripe order (letters, numbers, - and _ only)
+    const p = state.product.toUpperCase();
+    const col = colorName().replace(/[^A-Za-z0-9]/g, "").slice(0, 16) || "Color";
+    const sz = ($("#size").value || "NoSize").replace(/[^A-Za-z]/g, "");
+    const ab = { "baseball": "BB", "lightning-bolt": "LB", "crown": "CR", "number-7": "L7", "flame": "FL", "gold-star": "ST" };
+    const ch = ["leg", "elbow"].filter(g => guardsInUse().includes(g))
+      .map(g => g[0].toUpperCase() + state.charms[g].map(c => c ? ab[c] : "").filter(Boolean).join("")).join("_");
+    return `${p}-${col}-${sz}-${ch}`.slice(0, 200);
+  }
+  function openChecklist() {
+    const p = PRODUCTS.find(p => p.id === state.product);
+    const ul = $("#checklist"); ul.innerHTML = "";
+    const add = (label, qty) => { const li = document.createElement("li"); li.innerHTML = `<span>${label}</span><b>+ Add${qty > 1 ? " ×" + qty : ""}</b>`; ul.appendChild(li); };
+    add(p.stripe, 1);
+    CHARMS.forEach(c => { const n = countCharm(c.id); if (n) add(c.stripe, n); });
+    $("#design-text").textContent = designText();
+    $("#modal").classList.add("open");
+  }
+  function goToStripe() {
+    const url = STRIPE_LINK + "?client_reference_id=" + encodeURIComponent(designCode());
+    window.open(url, "_blank", "noopener");
+  }
+  function toast(msg) {
+    const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2200);
+  }
+
+  // ---------- events ----------
+  ["elbow", "leg"].forEach(g => document.getElementById("mini-wrap-" + g).addEventListener("click", () => {
+    const use = guardsInUse();
+    if (use.length > 1) { state.active = g === "leg" ? "elbow" : "leg"; layoutStage(); }
+  }));
+  ["elbow", "leg"].forEach(g => document.getElementById("wrap-" + g).addEventListener("click", () => {
+    if (guardsInUse().includes(g)) { state.active = g; layoutStage(); }
+  }));
+  $("#custom-color").addEventListener("input", () => { $("#color-name").textContent = colorName(); });
+  $("#shuffle").addEventListener("click", () => {
+    if (!state.product) { toast("Choose your guard first ☝️"); return; }
+    guardsInUse().forEach(g => {
+      state.charms[g] = state.charms[g].map(() => Math.random() < .7 ? CHARMS[Math.floor(Math.random() * CHARMS.length)].id : null);
+    });
+    update();
+  });
+  $("#clear").addEventListener("click", () => { ["leg", "elbow"].forEach(g => state.charms[g] = state.charms[g].map(() => null)); update(); });
+  $("#preorder").addEventListener("click", openChecklist);
+  $("#close").addEventListener("click", (e) => { e.preventDefault(); $("#modal").classList.remove("open"); });
+  $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") $("#modal").classList.remove("open"); });
+  $("#copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(designText()); toast("Design copied ✔"); }
+    catch { toast("Select the text above and copy it"); }
+  });
+  $("#go").addEventListener("click", goToStripe);
+
+  update();
+})();
+</script>
+</body>
+</html>
