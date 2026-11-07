@@ -137,8 +137,10 @@
   .custom-color { margin-top: 10px; display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; }
   .custom-color input[type=text] { flex: 1; min-width: 0; background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 8px 10px; font: inherit; }
 
-  .charms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  @media (min-width: 520px) { .charms { grid-template-columns: repeat(6, 1fr); } }
+  .charms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-height: 392px; overflow-y: auto; overflow-x: hidden; padding: 10px 6px 6px; margin: -10px -6px 0; overscroll-behavior: contain; }
+  .charms::-webkit-scrollbar { width: 6px; } .charms::-webkit-scrollbar-thumb { background: var(--lime-dark); border-radius: 3px; }
+  .scroll-hint { font-size: 12px; color: var(--lime); margin: 8px 0 0; }
+  @media (min-width: 520px) { .charms { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
   .charm-btn {
     background: var(--panel-2); border: 2px solid var(--line); border-radius: 12px; padding: 8px 4px 6px;
     display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; transition: transform .15s, border-color .15s;
@@ -161,7 +163,7 @@
     .mini-wrap.inactive { display: none; }
     .mini-wrap svg { width: 100%; max-height: 250px; height: auto; filter: drop-shadow(0 8px 12px rgba(0,0,0,.6)); }
     .mini-hint { font-size: 10px; color: var(--lime); text-align: center; margin-top: 6px; text-transform: uppercase; letter-spacing: .5px; }
-    .charm-area .charms { flex: 1; grid-template-columns: repeat(2, 1fr); align-content: start; }
+    .charm-area .charms { flex: 1; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; max-height: 330px; }
   }
   .charm-tools { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .ghost { background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; font-size: 13px; color: var(--muted); }
@@ -262,6 +264,7 @@
         </div>
         <div class="charms" id="charms"></div>
       </div>
+      <p class="scroll-hint">31 charms. Scroll the charm box for more ↓</p>
       <div class="charm-tools">
         <button class="ghost" id="shuffle" type="button">🎲 Surprise me</button>
         <button class="ghost" id="clear" type="button">Clear charms</button>
@@ -340,6 +343,31 @@
     { id: "number-7",       name: "Lucky 7",        stripe: "Affix Charm - Lucky 7" },
     { id: "flame",          name: "Flame",          stripe: "Affix Charm - Flame" },
     { id: "gold-star",      name: "Gold Star",      stripe: "Affix Charm - Gold Star" },
+    { id: "knight", name: "The Knight", stripe: "Affix Charm - The Knight" },
+    { id: "ag-shield", name: "AG Shield", stripe: "Affix Charm - AG Shield" },
+    { id: "crossed-bats", name: "Crossed Bats", stripe: "Affix Charm - Crossed Bats" },
+    { id: "home-plate", name: "Home Plate", stripe: "Affix Charm - Home Plate" },
+    { id: "letter-a", name: "Letter A", stripe: "Affix Charm - Letter A" },
+    { id: "mvp", name: "MVP", stripe: "Affix Charm - MVP" },
+    { id: "walk-off", name: "Walk-Off", stripe: "Affix Charm - Walk-Off" },
+    { id: "grand-slam", name: "Grand Slam", stripe: "Affix Charm - Grand Slam" },
+    { id: "ball-on-fire", name: "Ball on Fire", stripe: "Affix Charm - Ball on Fire" },
+    { id: "goat", name: "G.O.A.T.", stripe: "Affix Charm - G.O.A.T." },
+    { id: "skull-crossbats", name: "Skull & Bats", stripe: "Affix Charm - Skull & Bats" },
+    { id: "zombie-hand", name: "Zombie Hand", stripe: "Affix Charm - Zombie Hand" },
+    { id: "shark", name: "Shark", stripe: "Affix Charm - Shark" },
+    { id: "lion", name: "Lion", stripe: "Affix Charm - Lion" },
+    { id: "blazepup", name: "Blazepup", stripe: "Affix Charm - Blazepup" },
+    { id: "usa", name: "USA", stripe: "Affix Charm - USA" },
+    { id: "puerto-rico", name: "Puerto Rico", stripe: "Affix Charm - Puerto Rico" },
+    { id: "dominican-republic", name: "Dominican Rep.", stripe: "Affix Charm - Dominican Republic" },
+    { id: "mexico", name: "Mexico", stripe: "Affix Charm - Mexico" },
+    { id: "lime-heart", name: "Lime Heart", stripe: "Affix Charm - Lime Heart" },
+    { id: "softball", name: "Softball", stripe: "Affix Charm - Softball" },
+    { id: "trophy", name: "Trophy", stripe: "Affix Charm - Trophy" },
+    { id: "k-strikeout", name: "K Strikeout", stripe: "Affix Charm - K Strikeout" },
+    { id: "100", name: "100", stripe: "Affix Charm - 100" },
+    { id: "diamond", name: "Diamond", stripe: "Affix Charm - Diamond" },
   ];
   // charm holes (center points) for each guard, in SVG units
   const HOLES = {
