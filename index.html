@@ -309,7 +309,9 @@
 
 <script>
 (() => {
-  const STRIPE_LINK = "https://buy.stripe.com/dRm14ndoTfIWaY0bzefYY01";
+  const STRIPE_LINK = "https://buy.stripe.com/dRm14ndoTfIWaY0bzefYY01"; // backup if the checkout program is down
+  // Checkout program (Cloudflare Worker, src/checkout-worker/) that fills the Stripe cart with this exact design.
+  const CHECKOUT_API = "https://affixguard-checkout.ramos29tommy.workers.dev";
   const SHIPPING = 10.99, CHARM_PRICE = 10.99;
 
   const PRODUCTS = [
@@ -558,6 +560,37 @@
     const url = STRIPE_LINK + "?client_reference_id=" + encodeURIComponent(designCode());
     window.open(url, "_blank", "noopener");
   }
+  function saveDesign() {
+    try { localStorage.setItem("ag-design", JSON.stringify({ state, size: $("#size").value, custom: $("#custom-color").value })); } catch {}
+  }
+  function restoreDesign() {
+    try {
+      const d = JSON.parse(localStorage.getItem("ag-design") || "null"); if (!d) return false;
+      Object.assign(state, d.state); $("#size").value = d.size || ""; $("#custom-color").value = d.custom || ""; return true;
+    } catch { return false; }
+  }
+  async function preorder() {
+    if (!$("#size").value) {
+      toast("Pick your size first 👇"); $("#size").scrollIntoView({ behavior: "smooth", block: "center" }); $("#size").focus(); return;
+    }
+    if (!CHECKOUT_API) { openChecklist(); return; }
+    const btn = $("#preorder"), label = btn.innerHTML;
+    btn.disabled = true; btn.textContent = "Opening checkout…";
+    try {
+      const res = await fetch(CHECKOUT_API + "/checkout", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product: state.product, color: colorName(), size: $("#size").value,
+          charms: Object.fromEntries(guardsInUse().map(g => [g, state.charms[g]])) }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || "Checkout failed");
+      saveDesign();
+      window.location.href = data.url;   // Stripe checkout with everything already in the cart
+    } catch (e) {
+      btn.innerHTML = label; btn.disabled = false;
+      openChecklist();                  // backup: the old step-by-step list
+    }
+  }
   function toast(msg) {
     const t = $("#toast"); t.textContent = msg; t.classList.add("show");
     clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2200);
@@ -580,7 +613,7 @@
     update();
   });
   $("#clear").addEventListener("click", () => { ["leg", "elbow"].forEach(g => state.charms[g] = state.charms[g].map(() => null)); update(); });
-  $("#preorder").addEventListener("click", openChecklist);
+  $("#preorder").addEventListener("click", preorder);
   $("#close").addEventListener("click", (e) => { e.preventDefault(); $("#modal").classList.remove("open"); });
   $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") $("#modal").classList.remove("open"); });
   $("#copy").addEventListener("click", async () => {
@@ -589,6 +622,10 @@
   });
   $("#go").addEventListener("click", goToStripe);
 
+  const order = new URLSearchParams(location.search).get("order");
+  if (order === "cancelled" && restoreDesign()) setTimeout(() => toast("Your design is still here ✔"), 300);
+  if (order === "thanks") { try { localStorage.removeItem("ag-design"); } catch {} setTimeout(() => toast("Pre-order placed! Check your email 🛡️"), 300); }
+  if (order) history.replaceState(null, "", location.pathname);
   update();
 })();
 </script>
