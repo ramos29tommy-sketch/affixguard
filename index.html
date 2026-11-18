@@ -217,7 +217,7 @@
 
 <section class="hero">
   <h1>Build your <em>AffixGuard</em></h1>
-  <p>Pick your guard, pick your color, snap in your charms. Tap a charm to add it, tap it on the guard to take it off.</p>
+  <p>Pick your guard, your color and your strap color, then snap in your charms. Tap a charm to add it, tap it on the guard to take it off.</p>
 </section>
 
 <main>
@@ -253,7 +253,13 @@
     </div>
 
     <div class="step">
-      <h2><span class="num">3</span> Snap in your charms <small style="color:var(--muted);font-family:Inter;font-size:13px;font-weight:400">$10.99 each</small></h2>
+      <h2><span class="num">3</span> Pick your strap color</h2>
+      <div class="swatches" id="strap-swatches"></div>
+      <div class="color-name">Straps: <b id="strap-name">Lime Green</b></div>
+    </div>
+
+    <div class="step">
+      <h2><span class="num">4</span> Snap in your charms <small style="color:var(--muted);font-family:Inter;font-size:13px;font-weight:400">$10.99 each</small></h2>
       <div class="charm-area">
         <div class="mini" aria-label="Live preview of your guard">
           <div class="mini-guards">
@@ -273,7 +279,7 @@
     </div>
 
     <div class="step">
-      <h2><span class="num">4</span> Your size</h2>
+      <h2><span class="num">5</span> Your size</h2>
       <select id="size" aria-label="Size">
         <option value="">Choose a size…</option>
         <option>Youth Small</option><option>Youth Medium</option><option>Youth Large</option>
@@ -336,6 +342,20 @@
     { id: "pinkcamo", name: "Pink Camo", fill: "pattern:camo-pink", swatch: "repeating-linear-gradient(45deg,#f06aa8 0 8px,#b83c7a 8px 14px,#f9b3d3 14px 20px)" },
     { id: "camo",   name: "Camo",        fill: "pattern:camo-green", swatch: "repeating-linear-gradient(45deg,#4b5a2a 0 8px,#2e361a 8px 14px,#7d7a4a 14px 20px)" },
   ];
+  // Strap (Velcro) colors: fill, darker edge tab, stitching
+  const STRAPS = [
+    { id: "lime",   name: "Lime Green", fill: "#8be03a", tab: "#79c92f", stitch: "#4f8a1a" },
+    { id: "black",  name: "Black",      fill: "#222226", tab: "#151517", stitch: "#55555c" },
+    { id: "white",  name: "White",      fill: "#f2f2f2", tab: "#dcdcdc", stitch: "#a8a8a8" },
+    { id: "red",    name: "Red",        fill: "#d3283a", tab: "#b01f2f", stitch: "#7d1420" },
+    { id: "royal",  name: "Royal Blue", fill: "#2a5be0", tab: "#1f48b8", stitch: "#163380" },
+    { id: "navy",   name: "Navy",       fill: "#1c2d5e", tab: "#14224a", stitch: "#4a5a8a" },
+    { id: "green",  name: "Kelly Green",fill: "#1d9a46", tab: "#178a3c", stitch: "#0f5c28" },
+    { id: "orange", name: "Orange",     fill: "#f27a22", tab: "#d9661a", stitch: "#9a4510" },
+    { id: "gold",   name: "Gold",       fill: "#e0b02a", tab: "#c99a1e", stitch: "#8a6810" },
+    { id: "purple", name: "Purple",     fill: "#6a35b0", tab: "#5b2a9e", stitch: "#3a1a66" },
+    { id: "pink",   name: "Pink",       fill: "#f27ab2", tab: "#e0609a", stitch: "#a83c6e" },
+  ];
   const CHARMS = [
     { id: "baseball",       name: "Baseball",       stripe: "Affix Charm - Baseball" },
     { id: "lightning-bolt", name: "Lightning Bolt", stripe: "Affix Charm - Lightning Bolt" },
@@ -376,7 +396,7 @@
   };
   const CHARM_SIZE = 50;
 
-  const state = { product: null, color: "black", active: "leg", charms: { leg: Array(6).fill(null), elbow: Array(5).fill(null) } };
+  const state = { product: null, color: "black", strap: "lime", active: "leg", charms: { leg: Array(6).fill(null), elbow: Array(5).fill(null) } };
   const $ = (s) => document.querySelector(s);
   const money = (n) => "$" + n.toFixed(2);
 
@@ -427,11 +447,12 @@
     vents.forEach(([x, y]) => el("circle", { cx: x, cy: y, r: 7, fill: "#050505", "fill-opacity": ".9" }, svg));
     // straps
     const straps = isLeg ? [[70, 70], [330, 64]] : [[66, 50], [252, 48]];
+    const strap = STRAPS.find(c => c.id === state.strap) || STRAPS[0];
     straps.forEach(([y, h]) => {
-      el("rect", { x: 14, y: y, width: 192, height: h, rx: 8, fill: "#8be03a" }, svg);
+      el("rect", { x: 14, y: y, width: 192, height: h, rx: 8, fill: strap.fill }, svg);
       el("rect", { x: 14, y: y, width: 192, height: h, rx: 8, fill: "url(#shine-" + key + ")", opacity: ".6" }, svg);
-      el("rect", { x: 20, y: y + 5, width: 180, height: h - 10, rx: 5, fill: "none", stroke: "#4f8a1a", "stroke-width": "1.5", "stroke-dasharray": "4 3" }, svg);
-      el("rect", { x: 14, y: y, width: 28, height: h, rx: 6, fill: "#79c92f" }, svg);
+      el("rect", { x: 20, y: y + 5, width: 180, height: h - 10, rx: 5, fill: "none", stroke: strap.stitch, "stroke-width": "1.5", "stroke-dasharray": "4 3" }, svg);
+      el("rect", { x: 14, y: y, width: 28, height: h, rx: 6, fill: strap.tab }, svg);
       const s = h - 10;
       el("image", { href: "img/logo.png", x: 110 - s * 0.42, y: y + 5, width: s * 0.84, height: s, preserveAspectRatio: "xMidYMid meet", style: "mix-blend-mode:multiply" }, svg);
     });
@@ -471,6 +492,16 @@
       b.type = "button"; b.className = "swatch" + (state.color === c.id ? " selected" : "");
       b.style.background = c.swatch || c.fill; b.title = c.name; b.setAttribute("aria-label", c.name);
       b.addEventListener("click", () => { state.color = c.id; $("#custom-color").value = ""; update(); });
+      box.appendChild(b);
+    });
+  }
+  function renderStrapSwatches() {
+    const box = $("#strap-swatches"); box.innerHTML = "";
+    STRAPS.forEach(c => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "swatch" + (state.strap === c.id ? " selected" : "");
+      b.style.background = c.fill; b.title = c.name + " straps"; b.setAttribute("aria-label", c.name + " straps");
+      b.addEventListener("click", () => { state.strap = c.id; update(); });
       box.appendChild(b);
     });
   }
@@ -535,12 +566,16 @@
   function removeCharm(g, i) { state.charms[g][i] = null; update(); }
   function totalCharms() { return guardsInUse().reduce((n, g) => n + state.charms[g].filter(Boolean).length, 0); }
 
+  function strapName() { return (STRAPS.find(c => c.id === state.strap) || STRAPS[0]).name; }
+  // what goes on the order: guard color + strap color, e.g. "Black, Pink straps"
+  function orderColor() { return `${colorName()}, ${strapName()} straps`; }
   function colorName() {
     const custom = $("#custom-color").value.trim();
     return custom || COLORS.find(c => c.id === state.color).name;
   }
   function update() {
-    drawAll(); renderProducts(); renderSwatches(); renderCharms(); layoutStage();
+    drawAll(); renderProducts(); renderSwatches(); renderStrapSwatches(); renderCharms(); layoutStage();
+    $("#strap-name").textContent = strapName();
     $("#color-name").textContent = colorName();
     const p = PRODUCTS.find(p => p.id === state.product);
     const n = totalCharms();
@@ -557,7 +592,7 @@
   // ---------- checkout ----------
   function designText() {
     const p = PRODUCTS.find(p => p.id === state.product);
-    const parts = [`${p.name}`, `Color: ${colorName()}`];
+    const parts = [`${p.name}`, `Color: ${colorName()}`, `Straps: ${strapName()}`];
     const size = $("#size").value; if (size) parts.push(`Size: ${size}`);
     p.guards.forEach(g => {
       const list = state.charms[g].filter(Boolean).map(id => CHARMS.find(c => c.id === id).name);
@@ -568,7 +603,7 @@
   function designCode() {
     // short code stored on the Stripe order (letters, numbers, - and _ only)
     const p = state.product.toUpperCase();
-    const col = colorName().replace(/[^A-Za-z0-9]/g, "").slice(0, 16) || "Color";
+    const col = (colorName().replace(/[^A-Za-z0-9]/g, "").slice(0, 10) || "Color") + "S" + strapName().replace(/[^A-Za-z]/g, "").slice(0, 6);
     const sz = ($("#size").value || "NoSize").replace(/[^A-Za-z]/g, "");
     const ab = { "baseball": "BB", "lightning-bolt": "LB", "crown": "CR", "number-7": "L7", "flame": "FL", "gold-star": "ST" };
     const ch = ["leg", "elbow"].filter(g => guardsInUse().includes(g))
@@ -594,7 +629,7 @@
   function restoreDesign() {
     try {
       const d = JSON.parse(localStorage.getItem("ag-design") || "null"); if (!d) return false;
-      Object.assign(state, d.state); $("#size").value = d.size || ""; $("#custom-color").value = d.custom || ""; return true;
+      Object.assign(state, d.state); if (!STRAPS.some(c => c.id === state.strap)) state.strap = "lime"; $("#size").value = d.size || ""; $("#custom-color").value = d.custom || ""; return true;
     } catch { return false; }
   }
   async function preorder() {
@@ -607,7 +642,7 @@
     try {
       const res = await fetch(CHECKOUT_API + "/checkout", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product: state.product, color: colorName(), size: $("#size").value,
+        body: JSON.stringify({ product: state.product, color: orderColor(), size: $("#size").value,
           charms: Object.fromEntries(guardsInUse().map(g => [g, state.charms[g]])) }),
       });
       const data = await res.json();
